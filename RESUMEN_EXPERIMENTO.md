@@ -124,10 +124,3 @@ El resultado perfecto (1.0 en todas las métricas) se debe al dataset pequeño y
 ```bash
 git log --oneline --graph --all --decorate
 ```
-
-### Próximos pasos para entrega
-1. Crear rama en GitHub
-2. Realizar commit con cambios
-3. Generar capturas de pantalla
-4. Crear documento Word/PDF con evidencia
-5. Incluir enlace al repositorio GitHub
