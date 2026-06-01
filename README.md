@@ -16,6 +16,54 @@ cd proyecto_churn_mlops
 pip install -r requirements.txt
 ```
 
+## 🏃‍♂️ Pasos de ejecución
+
+### Paso 1: Preparar datos
+```bash
+python src/preparar_datos.py
+```
+- Genera datos de ejemplo
+- Divide en conjuntos de entrenamiento y prueba
+- Crea archivos `data/train.csv` y `data/test.csv`
+
+### Paso 2: Entrenar modelos
+```bash
+python src/entrenar_modelo.py
+```
+- Entrena **Regresión Logística** (modelo base)
+- Entrena **Random Forest** (nuevo modelo)
+- Guarda modelos en `models/modelo_churn.pkl` y `models/modelo_rf.pkl`
+
+### Paso 3: Evaluar modelos
+```bash
+python src/evaluar_modelo.py
+```
+- Calcula métricas (Accuracy, Precision, Recall, F1-score, ROC-AUC)
+- Guarda resultados en `docs/metricas_modelo.md`
+
+### Paso 4: Iniciar API
+```bash
+uvicorn api.main:app --reload
+```
+- Inicia servidor FastAPI en `http://localhost:8000`
+- Endpoint disponible: `/predict`
+
+### Paso 5: Probar API (opcional)
+```bash
+python tests/test_api_nueva.py
+```
+- Ejecuta prueba automatizada de la API
+
+### Verificación rápida
+```bash
+curl http://localhost:8000/health
+```
+
+### Estructura generada
+- `data/`: archivos CSV de datos
+- `models/`: modelos entrenados (.pkl)
+- `docs/`: métricas de evaluación
+
 ## 📄 Documentación del experimento
 Para detalles completos del experimento realizado, consulta el [RESUMEN_EXPERIMENTO.md](RESUMEN_EXPERIMENTO.md).
 
