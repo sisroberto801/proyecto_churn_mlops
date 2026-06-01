@@ -122,7 +122,6 @@ Este proyecto utiliza Git para registrar cambios y GitHub para respaldar el repo
 
 El uso de commits permite mantener trazabilidad sobre los cambios realizados en el código, la documentación y la estructura del proyecto.
 
-## 📊 Mejoras realizadas (Mayo 2026)
 ### Algoritmos
 - Regresión Logística (base)
 - Random Forest (nuevo)
