@@ -33,7 +33,9 @@ def cargar_modelo():
 @app.get("/")
 def inicio():
     return {
-        "mensaje": "API de predicción de churn activa"
+        "mensaje": "Servicio ML-Ops activo",
+        "estado": "ok",
+        "autor": "Roberto Carlos Olguin Ledezma"
     }
 
 @app.get("/health")
