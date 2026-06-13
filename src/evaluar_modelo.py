@@ -11,7 +11,7 @@ MODELS_DIR = BASE_DIR / "models"
 DOCS_DIR = BASE_DIR / "docs"
 
 TEST_DATA = DATA_DIR / "test.csv"
-MODEL_FILE = MODELS_DIR / "modelo_churn.pkl"
+MODEL_FILE = MODELS_DIR / "modelo_churn_v1.joblib"
 METRICS_FILE = DOCS_DIR / "metricas_modelo.md"
 
 def evaluar_modelo():

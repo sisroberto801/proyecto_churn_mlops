@@ -1,0 +1,25 @@
+{
+  "nombre_modelo": "modelo_churn_v1",
+  "version": "1.0",
+  "autor": "Roberto Carlos Olguin Ledezma",
+  "fecha_entrenamiento": "2026-06-13T16:08:20.599255",
+  "algoritmo": "Regresión Logística con StandardScaler",
+  "hiperparametros": {
+    "C": 1.0,
+    "max_iter": 1000
+  },
+  "variables_entrada": [
+    "edad",
+    "antiguedad_meses",
+    "saldo_promedio",
+    "reclamos",
+    "usa_app"
+  ],
+  "variable_objetivo": "churn",
+  "metricas": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
+  }
+}

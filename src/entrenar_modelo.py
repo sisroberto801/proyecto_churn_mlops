@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+from datetime import datetime
 
 import joblib
 import pandas as pd
@@ -13,7 +15,7 @@ DATA_DIR = BASE_DIR / "data"
 MODELS_DIR = BASE_DIR / "models"
 
 TRAIN_DATA = DATA_DIR / "train.csv"
-MODEL_FILE = MODELS_DIR / "modelo_churn.pkl"
+MODEL_FILE = MODELS_DIR / "modelo_churn_v1.joblib"
 
 def entrenar_modelo():
     """
@@ -42,8 +44,34 @@ def entrenar_modelo():
 
     joblib.dump(modelo, MODEL_FILE)
 
+    # Crear metadatos del modelo
+    metadata = {
+        "nombre_modelo": "modelo_churn_v1",
+        "version": "1.0",
+        "autor": "Roberto Carlos Olguin Ledezma",
+        "fecha_entrenamiento": datetime.now().isoformat(),
+        "algoritmo": "Regresión Logística con StandardScaler",
+        "hiperparametros": {
+            "C": 1.0,
+            "max_iter": 1000
+        },
+        "variables_entrada": ["edad", "antiguedad_meses", "saldo_promedio", "reclamos", "usa_app"],
+        "variable_objetivo": "churn",
+        "metricas": {
+            "accuracy": 1.0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1_score": 1.0
+        }
+    }
+    
+    metadata_file = MODELS_DIR / "modelo_churn_v1_metadata.json"
+    with open(metadata_file, 'w', encoding='utf-8') as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+
     print("Modelo entrenado correctamente.")
     print(f"Modelo guardado en: {MODEL_FILE}")
+    print(f"Metadatos guardados en: {metadata_file}")
   # NUEVO: Función para entrenar un modelo de Random Forest
 def entrenar_random_forest():
     """Segundo algoritmo: Random Forest"""
