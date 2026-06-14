@@ -4,6 +4,8 @@ Proyecto académico de MLOps para predicción de abandono de clientes (churn) ut
 
 **Autor:** Roberto Carlos Olguin Ledezma
 
+**Repositorio GitHub:** https://github.com/sisroberto801/proyecto_churn_mlops.git
+
 ## Descripción
 
 Este proyecto implementa un pipeline completo de Machine Learning para predecir el riesgo de abandono de clientes. Incluye:

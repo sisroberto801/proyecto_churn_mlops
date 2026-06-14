@@ -11,13 +11,11 @@ import joblib
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = PROJECT_ROOT / "models" / "modelo_churn_v1.joblib"
 
 VERSION_MODELO = "modelo_churn_v1"
 AUTOR = "Roberto Carlos Olguin Ledezma"
-
 
 if not MODEL_PATH.exists():
     raise RuntimeError(
@@ -80,6 +78,53 @@ def health() -> dict[str, str]:
     return {
         "estado": "ok",
         "modelo": VERSION_MODELO,
+    }
+
+
+@app.get("/info")
+def info() -> dict[str, object]:
+    """Endpoint informativo con detalles del modelo y servicio."""
+    import json
+    from pathlib import Path
+
+    metadata_path = Path(__file__).resolve().parents[1] / "models" / "modelo_churn_v1_metadata.json"
+
+    # Cargar metadatos si existen
+    metadata = {}
+    if metadata_path.exists():
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            metadata = json.load(f)
+
+    return {
+        "version_modelo": VERSION_MODELO,
+        "autor": AUTOR,
+        "descripcion": "API de predicción de churn con Machine Learning",
+        "variables_entrada": [
+            {
+                "nombre": "antiguedad",
+                "tipo": "int",
+                "descripcion": "Antigüedad del cliente en meses (0-120)",
+                "rango": "0-120"
+            },
+            {
+                "nombre": "cargo_mensual",
+                "tipo": "float",
+                "descripcion": "Cargo mensual del cliente (0-1000)",
+                "rango": "0-1000"
+            },
+            {
+                "nombre": "reclamos",
+                "tipo": "int",
+                "descripcion": "Cantidad de reclamos recientes (0-50)",
+                "rango": "0-50"
+            }
+        ],
+        "endpoint_prediccion": "/predict",
+        "metodo_prediccion": "POST",
+        "modelo_tipo": "LogisticRegression con StandardScaler",
+        "metricas_disponibles": metadata.get("metricas", {}),
+        "version_sklearn": metadata.get("version_sklearn", "No disponible"),
+        "estado_servicio": "activo"
     }
 
 
