@@ -1,25 +1,15 @@
 {
-  "nombre_modelo": "modelo_churn_v1",
-  "version": "1.0",
-  "autor": "Roberto Carlos Olguin Ledezma",
-  "fecha_entrenamiento": "2026-06-13T16:08:20.599255",
-  "algoritmo": "Regresión Logística con StandardScaler",
-  "hiperparametros": {
-    "C": 1.0,
-    "max_iter": 1000
-  },
+  "version_modelo": "modelo_churn_v1",
+  "archivo_modelo": "modelo_churn_v1.joblib",
   "variables_entrada": [
-    "edad",
-    "antiguedad_meses",
-    "saldo_promedio",
-    "reclamos",
-    "usa_app"
+    "antiguedad",
+    "cargo_mensual",
+    "reclamos"
   ],
-  "variable_objetivo": "churn",
+  "version_sklearn": "1.8.0",
   "metricas": {
-    "accuracy": 1.0,
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1_score": 1.0
+    "accuracy": 0.825,
+    "f1_score": 0.8659,
+    "auc_roc": 0.8749
   }
 }

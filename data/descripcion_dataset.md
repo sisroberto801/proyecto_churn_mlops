@@ -5,9 +5,11 @@ Este proyecto utiliza un dataset de ejemplo para analizar el abandono de cliente
 ## Variable objetivo
 
 La variable objetivo es:
+
 ```text
 churn
 ```
+
 Valores posibles:
 
 - `0`: el cliente no abandonó el servicio.

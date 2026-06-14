@@ -3,12 +3,14 @@ from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "data"
 
 RAW_DATA = DATA_DIR / "churn_clientes.csv"
 TRAIN_DATA = DATA_DIR / "train.csv"
 TEST_DATA = DATA_DIR / "test.csv"
+
 
 def crear_dataset_demo():
     """
@@ -38,6 +40,7 @@ def crear_dataset_demo():
     df = pd.DataFrame(datos)
     df.to_csv(RAW_DATA, index=False)
 
+
 def preparar_datos():
     """
     Prepara los datos para entrenamiento y prueba.
@@ -66,6 +69,7 @@ def preparar_datos():
     print("Datos preparados correctamente.")
     print(f"Archivo de entrenamiento: {TRAIN_DATA}")
     print(f"Archivo de prueba: {TEST_DATA}")
+
 
 if __name__ == "__main__":
     preparar_datos()

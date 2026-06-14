@@ -1,10 +1,7 @@
-fastapi[standard]
+fastapi[standard] 
 numpy
 pandas
 scikit-learn
 joblib
 pytest
 httpx
-requests
-uvicorn
-pydantic

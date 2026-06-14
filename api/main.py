@@ -1,146 +1,109 @@
+"""
+API de predicción de churn con FastAPI.
+
+La API carga un modelo serializado, valida los datos de entrada
+y devuelve una predicción junto con su probabilidad.
+"""
+
 from pathlib import Path
-import json
 
 import joblib
-import pandas as pd
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
-BASE_DIR = Path(__file__).resolve().parents[1]
-MODEL_FILE = BASE_DIR / "models" / "modelo_churn_v1.joblib"
-METADATA_FILE = BASE_DIR / "models" / "modelo_churn_v1_metadata.json"
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MODEL_PATH = PROJECT_ROOT / "models" / "modelo_churn_v1.joblib"
+
+VERSION_MODELO = "modelo_churn_v1"
+AUTOR = "Roberto Carlos Olguin Ledezma"
+
+
+if not MODEL_PATH.exists():
+    raise RuntimeError(
+        "No se encontró el modelo serializado. "
+        "Ejecute primero: python src\\entrenar_modelo.py"
+    )
+
+modelo = joblib.load(MODEL_PATH)
+
+
+class ClienteEntrada(BaseModel):
+    antiguedad: int = Field(
+        ...,
+        ge=0,
+        le=120,
+        description="Antigüedad del cliente expresada en meses",
+        examples=[12],
+    )
+    cargo_mensual: float = Field(
+        ...,
+        ge=0,
+        le=1000,
+        description="Cargo mensual del cliente",
+        examples=[95.5],
+    )
+    reclamos: int = Field(
+        ...,
+        ge=0,
+        le=50,
+        description="Cantidad de reclamos recientes",
+        examples=[3],
+    )
+
+
+class PrediccionSalida(BaseModel):
+    prediccion: str
+    probabilidad: float
+    version_modelo: str
+    autor: str
+
 
 app = FastAPI(
-    title="API de Predicción de Churn",
-    version="0.1.0",
-    description="API básica para consumir un modelo de Machine Learning."
+    title="API de predicción de churn",
+    description="Servicio académico ML-Ops para estimar riesgo de abandono.",
+    version="1.0.0",
 )
 
-class Cliente(BaseModel):
-    edad: int = Field(..., ge=18, le=100, description="Edad del cliente (18-100 años)")
-    antiguedad_meses: int = Field(..., ge=0, description="Antigüedad en meses")
-    saldo_promedio: float = Field(..., ge=0, description="Saldo promedio mensual")
-    reclamos: int = Field(..., ge=0, description="Número de reclamos")
-    usa_app: int = Field(..., ge=0, le=1, description="Usa aplicación móvil (0=No, 1=Sí)")
-
-    @validator('saldo_promedio')
-    def validar_saldo(cls, v):
-        if v > 1000000:
-            raise ValueError('El saldo promedio no puede superar $1,000,000')
-        return v
-
-def cargar_modelo():
-    """
-    Carga el modelo entrenado si existe.
-    """
-    if not MODEL_FILE.exists():
-      return None
-
-    return joblib.load(MODEL_FILE)
-
-def cargar_metadatos():
-    """
-    Carga los metadatos del modelo si existen.
-    """
-    if not METADATA_FILE.exists():
-        return None
-    
-    with open(METADATA_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def determinar_nivel_riesgo(probabilidad):
-    """
-    Determina el nivel de riesgo basado en la probabilidad.
-    """
-    if probabilidad is None:
-        return "desconocido"
-    elif probabilidad < 0.3:
-        return "bajo"
-    elif probabilidad < 0.7:
-        return "medio"
-    else:
-        return "alto"
 
 @app.get("/")
-def inicio():
+def inicio() -> dict[str, str]:
     return {
         "mensaje": "Servicio ML-Ops activo",
         "estado": "ok",
-        "autor": "Roberto Carlos Olguin Ledezma"
+        "autor": "Roberto Carlos Olguin Ledezma",
     }
+
 
 @app.get("/health")
-def health():
+def health() -> dict[str, str]:
     return {
         "estado": "ok",
-        "modelo_disponible": MODEL_FILE.exists(),
-        "metadatos_disponibles": METADATA_FILE.exists()
+        "modelo": VERSION_MODELO,
     }
 
-@app.get("/info")
-def info():
-    """
-    Endpoint informativo con detalles del modelo.
-    MEJORA TÉCNICA PERSONAL
-    """
-    metadatos = cargar_metadatos()
-    
-    if metadatos is None:
-        return {
-            "mensaje": "Metadatos no disponibles",
-            "modelo_disponible": MODEL_FILE.exists()
-        }
-    
-    return {
-        "nombre_modelo": metadatos.get("nombre_modelo"),
-        "version": metadatos.get("version"),
-        "autor": metadatos.get("autor"),
-        "fecha_entrenamiento": metadatos.get("fecha_entrenamiento"),
-        "algoritmo": metadatos.get("algoritmo"),
-        "variables_entrada": metadatos.get("variables_entrada"),
-        "variable_objetivo": metadatos.get("variable_objetivo"),
-        "metricas": metadatos.get("metricas")
-    }
 
-@app.post("/predict")
-def predict(cliente: Cliente):
-    modelo = cargar_modelo()
+@app.post("/predict", response_model=PrediccionSalida)
+def predict(datos: ClienteEntrada) -> PrediccionSalida:
+    try:
+        X = [[
+            datos.antiguedad,
+            datos.cargo_mensual,
+            datos.reclamos,
+        ]]
 
-    if modelo is None:
-        raise HTTPException(
-            status_code=503,
-            detail="El modelo aún no está disponible. Primero se debe entrenar el modelo."
+        probabilidad = float(modelo.predict_proba(X)[0][1])
+        etiqueta = "alto_riesgo" if probabilidad >= 0.50 else "bajo_riesgo"
+
+        return PrediccionSalida(
+            prediccion=etiqueta,
+            probabilidad=round(probabilidad, 4),
+            version_modelo=VERSION_MODELO,
+            autor=AUTOR,
         )
 
-    datos = pd.DataFrame([cliente.model_dump()])
-
-    prediccion = int(modelo.predict(datos)[0])
-
-    probabilidad = None
-    if hasattr(modelo, "predict_proba"):
-        probabilidad = float(modelo.predict_proba(datos)[0][1])
-
-    # MEJORA TÉCNICA: Nivel de riesgo y recomendaciones
-    nivel_riesgo = determinar_nivel_riesgo(probabilidad)
-    
-    # Generar descripción y recomendación
-    if prediccion == 1:
-        descripcion = "El cliente presenta alta probabilidad de abandono"
-        if nivel_riesgo == "alto":
-            recomendacion = "Contactar inmediatamente con ofertas especiales y atención prioritaria"
-        elif nivel_riesgo == "medio":
-            recomendacion = "Programar llamada de retención dentro de 48 horas"
-        else:
-            recomendacion = "Enviar campaña de fidelización personalizada"
-    else:
-        descripcion = "El cliente tiene baja probabilidad de abandono"
-        recomendacion = "Mantener servicio regular y programa de lealtad"
-
-    return {
-        "churn_predicho": prediccion,
-        "probabilidad_churn": probabilidad,
-        "nivel_riesgo": nivel_riesgo,
-        "descripcion": descripcion,
-        "recomendacion": recomendacion,
-        "autor": "Roberto Carlos Olguin Ledezma"
-    }
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="No fue posible generar la predicción.",
+        ) from exc

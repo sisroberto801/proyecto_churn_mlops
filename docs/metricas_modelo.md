@@ -4,11 +4,11 @@
 
 | Métrica | Valor |
 |---|---:|
-| Accuracy | 1.0000 |
-| Precision | 1.0000 |
+| Accuracy | 0.5000 |
+| Precision | 0.5000 |
 | Recall | 1.0000 |
-| F1-score | 1.0000 |
-| AUC | 1.0000 |      # Agregado valor de AUC
+| F1-score | 0.6667 |
+
 ## Interpretación inicial
 
 Estas métricas permiten evaluar el desempeño inicial del modelo de clasificación.

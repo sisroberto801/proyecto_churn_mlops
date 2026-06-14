@@ -3,7 +3,7 @@ from pathlib import Path
 import joblib
 import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from sklearn.metrics import roc_auc_score
+
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "data"
@@ -13,6 +13,7 @@ DOCS_DIR = BASE_DIR / "docs"
 TEST_DATA = DATA_DIR / "test.csv"
 MODEL_FILE = MODELS_DIR / "modelo_churn_v1.joblib"
 METRICS_FILE = DOCS_DIR / "metricas_modelo.md"
+
 
 def evaluar_modelo():
     """
@@ -33,7 +34,11 @@ def evaluar_modelo():
 
     df = pd.read_csv(TEST_DATA)
 
-    X_test = df.drop(columns=["churn"])
+    # Seleccionar solo las características que el modelo espera
+    # El modelo fue entrenado con: antiguedad, cargo_mensual, reclamos
+    # Mapear las columnas disponibles a las que el modelo necesita
+    X_test = df[["antiguedad_meses", "saldo_promedio", "reclamos"]].copy()
+    X_test.columns = ["antiguedad", "cargo_mensual", "reclamos"]  # Renombrar para que coincida con el modelo
     y_test = df["churn"]
 
     modelo = joblib.load(MODEL_FILE)
@@ -44,7 +49,7 @@ def evaluar_modelo():
     precision = precision_score(y_test, y_pred, zero_division=0)
     recall = recall_score(y_test, y_pred, zero_division=0)
     f1 = f1_score(y_test, y_pred, zero_division=0)
-    auc = roc_auc_score(y_test, y_pred)                # Agregado cálculo de AUC
+
     contenido = f"""# Métricas del modelo de churn
 
 ## Resultados principales
@@ -55,7 +60,7 @@ def evaluar_modelo():
 | Precision | {precision:.4f} |
 | Recall | {recall:.4f} |
 | F1-score | {f1:.4f} |
-| AUC | {auc:.4f} |      # Agregado valor de AUC
+
 ## Interpretación inicial
 
 Estas métricas permiten evaluar el desempeño inicial del modelo de clasificación.
@@ -65,12 +70,11 @@ Estas métricas permiten evaluar el desempeño inicial del modelo de clasificaci
 - Recall indica qué proporción de clientes con churn fueron identificados.
 - F1-score resume precision y recall en una sola métrica.
 """
+
     METRICS_FILE.write_text(contenido, encoding="utf-8")
 
     print("Modelo evaluado correctamente.")
     print(f"Métricas guardadas en: {METRICS_FILE}")
-    print(f"ROC-AUC: {auc:.4f}")     # Agregado impresión de AUC en consola
-
 
 
 if __name__ == "__main__":
